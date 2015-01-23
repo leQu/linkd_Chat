@@ -37,7 +37,7 @@ public class MainActivity extends ActionBarActivity {
 
 
         createListView();
-        setTitle("Linkd");
+        setTitle("linkd");
 
 
         final EditText searchField = (EditText) findViewById(R.id.searchField);

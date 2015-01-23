@@ -7,24 +7,38 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 
 public class chatScreen extends ActionBarActivity {
 
+    boolean isMessages = false;
+    Message [] messageArray = new Message[20];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+       if(!isMessages){
+            int i = 0;
+            while(i < 20){
+                messageArray[i] = new Message();
+                messageArray[i].setMessage("");
+                i++;
+            }
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_screen);
         setTitle(MainActivity.getNameOfChat());
+        createMessageListView();
 
 
-
-
-        EditText inputTextLine = (EditText) findViewById(R.id.inputTextLine);
-        final TextView mainText1 = (TextView) findViewById(R.id.mainText1);
+        final EditText inputTextLine = (EditText) findViewById(R.id.inputTextLine);
+        //final TextView mainText1 = (TextView) findViewById(R.id.mainText1);
 
         inputTextLine.addTextChangedListener(new TextWatcher() {
             @Override
@@ -37,7 +51,10 @@ public class chatScreen extends ActionBarActivity {
                 button1.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mainText1.setText(textToPrint);
+                        isMessages = true;
+                        inputTextLine.setText("");
+                        createMessage(String.valueOf(textToPrint));
+                       // mainText1.setText(textToPrint);
                     }
                 });
             }
@@ -46,9 +63,39 @@ public class chatScreen extends ActionBarActivity {
             public void afterTextChanged(Editable s) {
             }
         });
-
     }
 
+    public void createMessageListView() {
+        ListView messageList = (ListView) findViewById(R.id.displayMessages);
+
+        if(messageArray[19] != null) {
+            String [] messageStrings = new String[20];
+            int i = 0;
+            while(i < 20){
+                messageStrings[i] = messageArray[i].getMessage();
+                i++;
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, messageStrings);
+            messageList.setAdapter(adapter);
+            messageList.setTextFilterEnabled(true);
+        }
+    }
+
+    private void createMessage(String s) {
+        Message newMessage = new Message();
+        newMessage.setSelf(true);
+        newMessage.setMessage(s);
+        newMessage.setFromName("user");
+        int i = 0;
+
+        while (i < 19){
+            messageArray[i] = messageArray[i+1];
+            i++;
+        }
+        messageArray[19] = newMessage;
+        createMessageListView();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

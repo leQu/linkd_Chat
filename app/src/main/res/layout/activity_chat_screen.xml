@@ -34,21 +34,12 @@
         android:layout_toStartOf="@+id/go_button">
     </EditText>
 
-    <ScrollView
-        android:id="@+id/scrollView1"
-        android:layout_width="1000px"
+    <ListView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/go_button"
-        android:layout_alignParentStart="true">
-
-        <TextView
-            android:id="@+id/mainText1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fillViewport="true"
-            android:layout_above="@+id/go_button"
-            android:layout_alignEnd="@+id/go_button"
-            android:layout_marginBottom="33dp" />
-    </ScrollView>
+        android:id="@+id/displayMessages"
+        android:layout_above="@+id/inputTextLine"
+        android:stackFromBottom="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
