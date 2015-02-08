@@ -53,12 +53,13 @@ public class MainActivity extends ActionBarActivity {
                 button2.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
-                        nameOfChat = s;
-                        Intent intent = new Intent(context, chatScreen.class);
-                        addChatToRec(String.valueOf(s));
-                        searchField.setText("");
-                        startActivity(intent);
-
+                         nameOfChat = s;
+                         Intent intent = new Intent(context, chatScreen.class);
+                if(!String.valueOf(nameOfChat).equals("")) {
+                         addChatToRec(String.valueOf(s));
+                         searchField.setText("");
+                         startActivity(intent);
+                     }
                     }
                 });
             }
@@ -72,7 +73,7 @@ public class MainActivity extends ActionBarActivity {
         ListView recenlist = (ListView) findViewById(R.id.recentChatList);
 
        if(recCharArray[0] != null) {
-           ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, recCharArray);
+           ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.reclist_simple_list_item, recCharArray);
            recenlist.setAdapter(adapter);
            recenlist.setTextFilterEnabled(true);
        }
@@ -81,15 +82,15 @@ public class MainActivity extends ActionBarActivity {
         recenlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "myPos " + position, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, recCharArray[position], Toast.LENGTH_LONG).show();
                 nameOfChat = recCharArray[position];
-                Intent intent = new Intent(context, chatScreen.class);
-                addChatToRec(recCharArray[position]);
-                startActivity(intent);
+                if(!nameOfChat.equals("")) {
+                    Intent intent = new Intent(context, chatScreen.class);
+                    addChatToRec(recCharArray[position]);
+                    startActivity(intent);
+                }
             }
         });
-
-
     }
 
     @Override
