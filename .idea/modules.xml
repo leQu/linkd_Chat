@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fixingEmulator.iml" filepath="$PROJECT_DIR$/fixingEmulator.iml" />
       <module fileurl="file://$PROJECT_DIR$/linkd_Chat.iml" filepath="$PROJECT_DIR$/linkd_Chat.iml" />
     </modules>
   </component>

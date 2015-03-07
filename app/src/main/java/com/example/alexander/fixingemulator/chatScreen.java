@@ -16,21 +16,21 @@ import android.widget.TextView;
 
 public class chatScreen extends ActionBarActivity {
 
-    boolean isMessages = false;
-    Message [] messageArray = new Message[20];
+    Message [] messageArray = new Message[0];
+    int messagearraySize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-       if(!isMessages){
+  /**     if(!isMessages){
             int i = 0;
-            while(i < 20){
+            while(i <= arraySize){
                 messageArray[i] = new Message();
                 messageArray[i].setMessage("");
                 i++;
             }
         }
-
+**/
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_screen);
         setTitle(MainActivity.getNameOfChat());
@@ -51,7 +51,6 @@ public class chatScreen extends ActionBarActivity {
                 button1.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        isMessages = true;
                         inputTextLine.setText("");
                         createMessage(String.valueOf(textToPrint));
                        // mainText1.setText(textToPrint);
@@ -68,10 +67,10 @@ public class chatScreen extends ActionBarActivity {
     public void createMessageListView() {
         ListView messageList = (ListView) findViewById(R.id.displayMessages);
 
-        if(messageArray[19] != null) {
-            String [] messageStrings = new String[20];
+
+            String [] messageStrings = new String[messagearraySize];
             int i = 0;
-            while(i < 20){
+            while(i < messagearraySize){
                 messageStrings[i] = messageArray[i].getMessage();
                 i++;
             }
@@ -79,21 +78,18 @@ public class chatScreen extends ActionBarActivity {
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, messageStrings);
             messageList.setAdapter(adapter);
             messageList.setTextFilterEnabled(true);
-        }
+
     }
 
     private void createMessage(String s) {
+        expandArray();
         Message newMessage = new Message();
         newMessage.setSelf(true);
         newMessage.setMessage(s);
         newMessage.setFromName("user");
         int i = 0;
 
-        while (i < 19){
-            messageArray[i] = messageArray[i+1];
-            i++;
-        }
-        messageArray[19] = newMessage;
+        messageArray[(messagearraySize-1)] = newMessage;
         createMessageListView();
     }
 
@@ -117,5 +113,12 @@ public class chatScreen extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void expandArray(){
+        Message[] newArray = new Message[messageArray.length + 1];
+        System.arraycopy(messageArray, 0, newArray, 0, messageArray.length);
+        messagearraySize++;
+        messageArray = newArray;
     }
 }
