@@ -13,7 +13,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="GO"
-        android:onClick="DoIt"
         android:layout_alignBottom="@+id/inputTextLine"
         android:layout_alignParentEnd="true" />
 

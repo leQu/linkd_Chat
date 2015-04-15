@@ -49,16 +49,15 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onTextChanged(final CharSequence s, int start, int before, int count) {
                 Button button2 = (Button) findViewById(R.id.go_button2);
-
                 button2.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
-                         nameOfChat = s;
+                         String nameOfChat = String.valueOf(s);
                          Intent intent = new Intent(context, chatScreen.class);
-                if(!String.valueOf(nameOfChat).equals("")) {
-                         addChatToRec(String.valueOf(s));
-                         searchField.setText("");
-                         startActivity(intent);
+                        if(nameOfChat.trim().length() > 0) {
+                             addChatToRec(nameOfChat);
+                             searchField.setText("");
+                             startActivity(intent);
                      }
                     }
                 });
@@ -79,49 +78,49 @@ public class MainActivity extends ActionBarActivity {
        }
 
 
-        recenlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, recCharArray[position], Toast.LENGTH_LONG).show();
-                nameOfChat = recCharArray[position];
-                if(!nameOfChat.equals("")) {
-                    Intent intent = new Intent(context, chatScreen.class);
-                    addChatToRec(recCharArray[position]);
-                    startActivity(intent);
-                }
+                recenlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Toast.makeText(MainActivity.this, recCharArray[position], Toast.LENGTH_LONG).show();
+                        nameOfChat = recCharArray[position];
+                        if(!nameOfChat.equals("")) {
+                            Intent intent = new Intent(context, chatScreen.class);
+                            addChatToRec(recCharArray[position]);
+                            startActivity(intent);
+                        }
+                    }
+                });
             }
-        });
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        @Override
+        public boolean onCreateOptionsMenu(Menu menu) {
+            // Inflate the menu; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.menu_main, menu);
             return true;
         }
 
-        return super.onOptionsItemSelected(item);
-    }
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Handle action bar item clicks here. The action bar will
+            // automatically handle clicks on the Home/Up button, so long
+            // as you specify a parent activity in AndroidManifest.xml.
+            int id = item.getItemId();
+
+            //noinspection SimplifiableIfStatement
+            if (id == R.id.action_settings) {
+                return true;
+            }
+
+            return super.onOptionsItemSelected(item);
+        }
 
     public static CharSequence getNameOfChat() {
         return nameOfChat;
     }
 
     public void addChatToRec(String recChat) {
-            int tempInt = 0;
-            int i = 0;
+        int tempInt = 0;
+        int i = 0;
 
         while (i<4){
             if(recCharArray[i].equals(recChat)){
@@ -134,9 +133,9 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-            if (tempInt == 1){
-                recCharArray[1] = recCharArray[0];
-                recCharArray[0] = recChat;
+        if (tempInt == 1){
+            recCharArray[1] = recCharArray[0];
+            recCharArray[0] = recChat;
             }
             if (tempInt == 2){
                 recCharArray[2] = recCharArray[1];

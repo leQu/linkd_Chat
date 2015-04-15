@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class chatScreen extends ActionBarActivity {
@@ -39,7 +40,6 @@ public class chatScreen extends ActionBarActivity {
 
         final EditText inputTextLine = (EditText) findViewById(R.id.inputTextLine);
         //final TextView mainText1 = (TextView) findViewById(R.id.mainText1);
-
         inputTextLine.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -47,16 +47,19 @@ public class chatScreen extends ActionBarActivity {
 
             @Override
             public void onTextChanged(final CharSequence textToPrint, int start, int before, int count) {
-                Button button1 = (Button) findViewById(R.id.go_button);
-                button1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        inputTextLine.setText("");
-                        createMessage(String.valueOf(textToPrint));
-                       // mainText1.setText(textToPrint);
-                    }
-                });
-            }
+                    Button button1 = (Button) findViewById(R.id.go_button);
+                    button1.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String tempMessage = String.valueOf(textToPrint);
+                            if (tempMessage.trim().length() > 0) {
+                                inputTextLine.setText("");
+                                createMessage(tempMessage);
+                                // mainText1.setText(textToPrint);
+                            }
+                        }
+                    });
+                }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -82,15 +85,15 @@ public class chatScreen extends ActionBarActivity {
     }
 
     private void createMessage(String s) {
-        expandArray();
-        Message newMessage = new Message();
-        newMessage.setSelf(true);
-        newMessage.setMessage(s);
-        newMessage.setFromName("user");
-        int i = 0;
+            expandArray();
+            Message newMessage = new Message();
+            newMessage.setSelf(true);
+            newMessage.setMessage(s);
+            newMessage.setFromName("user");
+            int i = 0;
 
-        messageArray[(messagearraySize-1)] = newMessage;
-        createMessageListView();
+            messageArray[(messagearraySize-1)] = newMessage;
+            createMessageListView();
     }
 
     @Override
@@ -111,7 +114,6 @@ public class chatScreen extends ActionBarActivity {
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
