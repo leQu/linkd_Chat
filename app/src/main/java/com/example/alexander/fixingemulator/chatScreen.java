@@ -1,9 +1,11 @@
 package com.example.alexander.fixingemulator;
 
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,14 +13,35 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class chatScreen extends ActionBarActivity {
 
-    Message [] messageArray = new Message[0];
-    int messagearraySize = 0;
+    static Message [] messageArray = new Message[0];
+    static int messagearraySize = 0;
+    String tempUserName = "Alex";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +55,15 @@ public class chatScreen extends ActionBarActivity {
             }
         }
 **/
+        messageArray = new Message[0];
+        messagearraySize = 0;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_screen);
         setTitle(MainActivity.getNameOfChat());
-        createMessageListView();
 
+        new connectionTask(this).execute();
+
+        createMessageListView();
 
         final EditText inputTextLine = (EditText) findViewById(R.id.inputTextLine);
         //final TextView mainText1 = (TextView) findViewById(R.id.mainText1);
@@ -54,17 +81,35 @@ public class chatScreen extends ActionBarActivity {
                             String tempMessage = String.valueOf(textToPrint);
                             if (tempMessage.trim().length() > 0) {
                                 inputTextLine.setText("");
-                                createMessage(tempMessage);
-                                // mainText1.setText(textToPrint);
+                                createMessage(tempMessage, tempUserName, true);
+                                sendToServer(tempMessage, tempUserName);
                             }
                         }
                     });
                 }
-
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
+    }
+
+    public void sendToServer(String message, String user){
+        HttpClient client = new DefaultHttpClient();
+        HttpPost post = new HttpPost("http://188.166.120.241:8080/");
+        try {
+            List<NameValuePair> pairs = new ArrayList<NameValuePair>(3);
+            pairs.add(new BasicNameValuePair("message", message));
+            pairs.add(new BasicNameValuePair("user_name", user));
+            pairs.add(new BasicNameValuePair("chat_name", String.valueOf(MainActivity.getNameOfChat())));
+            post.setEntity(new UrlEncodedFormEntity(pairs));
+            HttpResponse response = client.execute(post);
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Log.i(response.toString(), "this is what we got?");
+        //new connectionTask(this).execute();
     }
 
     public void createMessageListView() {
@@ -74,7 +119,7 @@ public class chatScreen extends ActionBarActivity {
             String [] messageStrings = new String[messagearraySize];
             int i = 0;
             while(i < messagearraySize){
-                messageStrings[i] = messageArray[i].getMessage();
+                messageStrings[i] = messageArray[i].getFromName() + ": " + messageArray[i].getMessage();
                 i++;
             }
 
@@ -84,12 +129,12 @@ public class chatScreen extends ActionBarActivity {
 
     }
 
-    private void createMessage(String s) {
+    protected void createMessage(String s, String d, boolean f) {
             expandArray();
             Message newMessage = new Message();
-            newMessage.setSelf(true);
+            newMessage.setSelf(f);
             newMessage.setMessage(s);
-            newMessage.setFromName("user");
+            newMessage.setFromName(d);
             int i = 0;
 
             messageArray[(messagearraySize-1)] = newMessage;
@@ -117,10 +162,47 @@ public class chatScreen extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void expandArray(){
+    public static void expandArray(){
         Message[] newArray = new Message[messageArray.length + 1];
         System.arraycopy(messageArray, 0, newArray, 0, messageArray.length);
         messagearraySize++;
         messageArray = newArray;
+    }
+}
+
+class connectionTask extends AsyncTask<Void, Void, Void> {
+    String jsonStringTemp;
+    private final chatScreen chatty;
+    public connectionTask(chatScreen aChatty){
+        chatty = aChatty;
+    }
+
+    @Override
+    protected Void doInBackground(Void... params) {
+        try {
+            URL url = new URL("http://188.166.120.241:8080/"+String.valueOf(MainActivity.getNameOfChat()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+
+            jsonStringTemp = reader.readLine();
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        try {
+            JSONArray jsonArr = new JSONArray(jsonStringTemp);
+            for (int i = 0; i < jsonArr.length(); i++) {
+                JSONArray tmp = new JSONArray(jsonArr.get(i).toString());
+                chatty.createMessage(tmp.get(1).toString(), tmp.get(0).toString(), false);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

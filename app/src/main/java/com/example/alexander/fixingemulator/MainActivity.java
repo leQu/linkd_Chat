@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
-    static CharSequence nameOfChat;
+    static CharSequence globalnameOfChat;
     String [] recCharArray = {"","","",""};
     final Context context = this;
 
@@ -53,6 +53,7 @@ public class MainActivity extends ActionBarActivity {
                     @Override
                     public void onClick(View v) {
                          String nameOfChat = String.valueOf(s);
+                         globalnameOfChat = s;
                          Intent intent = new Intent(context, chatScreen.class);
                         if(nameOfChat.trim().length() > 0) {
                              addChatToRec(nameOfChat);
@@ -82,8 +83,8 @@ public class MainActivity extends ActionBarActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         Toast.makeText(MainActivity.this, recCharArray[position], Toast.LENGTH_LONG).show();
-                        nameOfChat = recCharArray[position];
-                        if(!nameOfChat.equals("")) {
+                        globalnameOfChat = recCharArray[position];
+                        if(!globalnameOfChat.equals("")) {
                             Intent intent = new Intent(context, chatScreen.class);
                             addChatToRec(recCharArray[position]);
                             startActivity(intent);
@@ -115,7 +116,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
     public static CharSequence getNameOfChat() {
-        return nameOfChat;
+        return globalnameOfChat;
     }
 
     public void addChatToRec(String recChat) {
