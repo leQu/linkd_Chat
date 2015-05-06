@@ -61,7 +61,7 @@ public class chatScreen extends ActionBarActivity {
         setContentView(R.layout.activity_chat_screen);
         setTitle(MainActivity.getNameOfChat());
 
-        new connectionTask(this).execute();
+        new getTask(this).execute();
 
         createMessageListView();
 
@@ -82,7 +82,7 @@ public class chatScreen extends ActionBarActivity {
                             if (tempMessage.trim().length() > 0) {
                                 inputTextLine.setText("");
                                 createMessage(tempMessage, tempUserName, true);
-                                sendToServer(tempMessage, tempUserName);
+                                new postTask(chatScreen.this, tempMessage, tempUserName).execute();
                             }
                         }
                     });
@@ -93,28 +93,8 @@ public class chatScreen extends ActionBarActivity {
         });
     }
 
-    public void sendToServer(String message, String user){
-        HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost("http://188.166.120.241:8080/");
-        try {
-            List<NameValuePair> pairs = new ArrayList<NameValuePair>(3);
-            pairs.add(new BasicNameValuePair("message", message));
-            pairs.add(new BasicNameValuePair("user_name", user));
-            pairs.add(new BasicNameValuePair("chat_name", String.valueOf(MainActivity.getNameOfChat())));
-            post.setEntity(new UrlEncodedFormEntity(pairs));
-            HttpResponse response = client.execute(post);
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //Log.i(response.toString(), "this is what we got?");
-        //new connectionTask(this).execute();
-    }
-
     public void createMessageListView() {
         ListView messageList = (ListView) findViewById(R.id.displayMessages);
-
 
             String [] messageStrings = new String[messagearraySize];
             int i = 0;
@@ -170,10 +150,40 @@ public class chatScreen extends ActionBarActivity {
     }
 }
 
-class connectionTask extends AsyncTask<Void, Void, Void> {
+class postTask extends AsyncTask<Void, Void, Void>{
+    private final chatScreen mainChat;
+    String message;
+    String user;
+    public postTask(chatScreen aChatScreen, String message, String user){
+        this.mainChat = aChatScreen;
+        this.message = message;
+        this.user = user;
+    }
+    @Override
+    protected Void doInBackground(Void... params) {
+        HttpClient client = new DefaultHttpClient();
+        HttpPost post = new HttpPost("http://188.166.120.241:8080/");
+        try {
+            List<NameValuePair> pairs = new ArrayList<NameValuePair>(3);
+            pairs.add(new BasicNameValuePair("message", message));
+            pairs.add(new BasicNameValuePair("user_name", user));
+            pairs.add(new BasicNameValuePair("chat_name", String.valueOf(MainActivity.getNameOfChat())));
+            post.setEntity(new UrlEncodedFormEntity(pairs));
+            HttpResponse response = client.execute(post);
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+}
+
+class getTask extends AsyncTask<Void, Void, Void> {
     String jsonStringTemp;
     private final chatScreen chatty;
-    public connectionTask(chatScreen aChatty){
+    public getTask(chatScreen aChatty){
         chatty = aChatty;
     }
 
@@ -184,6 +194,7 @@ class connectionTask extends AsyncTask<Void, Void, Void> {
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 
             jsonStringTemp = reader.readLine();
+
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
