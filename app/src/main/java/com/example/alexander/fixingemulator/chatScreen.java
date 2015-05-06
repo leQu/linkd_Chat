@@ -63,6 +63,7 @@ public class chatScreen extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         chatSocket.connect();
+        chatSocket.emit("join room", String.valueOf(MainActivity.getNameOfChat()));
         chatSocket.on("new json", onNewJson);
 
 
@@ -108,6 +109,7 @@ public class chatScreen extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        chatSocket.emit("leave room", String.valueOf(MainActivity.getNameOfChat()));
         chatSocket.disconnect();
     }
 
