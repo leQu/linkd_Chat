@@ -145,7 +145,7 @@ public class chatScreen extends ActionBarActivity {
                     }
 
                     // add the message to view
-                    //            addMessage(username, message);
+                    createMessage(username, message, false);
                 }
             });
         }
