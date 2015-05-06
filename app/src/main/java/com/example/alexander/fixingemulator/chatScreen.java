@@ -1,5 +1,6 @@
 package com.example.alexander.fixingemulator;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+import com.github.nkzawa.emitter.Emitter;
+
 
 public class chatScreen extends ActionBarActivity {
 
@@ -43,18 +50,22 @@ public class chatScreen extends ActionBarActivity {
     static int messagearraySize = 0;
     String tempUserName = "Alex";
 
+    private Socket chatSocket;
+    {
+        try {
+            chatSocket = IO.socket("http://188.166.120.241:8080");
+        } catch (URISyntaxException e) {
+            Log.e("here","wroong:",e);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-  /**     if(!isMessages){
-            int i = 0;
-            while(i <= arraySize){
-                messageArray[i] = new Message();
-                messageArray[i].setMessage("");
-                i++;
-            }
-        }
-**/
+        chatSocket.connect();
+        chatSocket.on("new json", onNewJson);
+
+
         messageArray = new Message[0];
         messagearraySize = 0;
         super.onCreate(savedInstanceState);
@@ -82,6 +93,7 @@ public class chatScreen extends ActionBarActivity {
                             if (tempMessage.trim().length() > 0) {
                                 inputTextLine.setText("");
                                 createMessage(tempMessage, tempUserName, true);
+                                attemptSend(String.valueOf(MainActivity.getNameOfChat()), tempUserName, tempMessage);
                                 new postTask(chatScreen.this, tempMessage, tempUserName).execute();
                             }
                         }
@@ -92,6 +104,52 @@ public class chatScreen extends ActionBarActivity {
             }
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        chatSocket.disconnect();
+    }
+
+    private void attemptSend(String chat, String user, String message){
+        JSONObject jsonMess = new JSONObject();
+        try {
+            jsonMess.put("chat", chat);
+            jsonMess.put("user", user);
+            jsonMess.put("message", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d(String.valueOf(jsonMess), "here");
+
+        if(message.trim().isEmpty()){
+            return;
+        }
+        chatSocket.emit("new json", jsonMess);
+    }
+
+    private Emitter.Listener onNewJson = new Emitter.Listener(){
+        @Override
+        public void call(final Object... args) {
+            chatScreen.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    try {
+                        username = data.getString("username");
+                        message = data.getString("message");
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    // add the message to view
+                    //            addMessage(username, message);
+                }
+            });
+        }
+    };
 
     public void createMessageListView() {
         ListView messageList = (ListView) findViewById(R.id.displayMessages);
@@ -154,20 +212,34 @@ class postTask extends AsyncTask<Void, Void, Void>{
     private final chatScreen mainChat;
     String message;
     String user;
+    String chat =  String.valueOf(MainActivity.getNameOfChat());
+
+    private Socket chatSocket;
+    {
+        try {
+            chatSocket = IO.socket("http://188.166.120.241:8080");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Log.e("should be here","??");
+        }
+    }
+
     public postTask(chatScreen aChatScreen, String message, String user){
         this.mainChat = aChatScreen;
         this.message = message;
         this.user = user;
     }
+
     @Override
     protected Void doInBackground(Void... params) {
+
         HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost("http://188.166.120.241:8080/");
         try {
             List<NameValuePair> pairs = new ArrayList<NameValuePair>(3);
             pairs.add(new BasicNameValuePair("message", message));
             pairs.add(new BasicNameValuePair("user_name", user));
-            pairs.add(new BasicNameValuePair("chat_name", String.valueOf(MainActivity.getNameOfChat())));
+            pairs.add(new BasicNameValuePair("chat_name", chat));
             post.setEntity(new UrlEncodedFormEntity(pairs));
             HttpResponse response = client.execute(post);
         } catch (ClientProtocolException e) {
@@ -178,6 +250,7 @@ class postTask extends AsyncTask<Void, Void, Void>{
 
         return null;
     }
+
 }
 
 class getTask extends AsyncTask<Void, Void, Void> {
